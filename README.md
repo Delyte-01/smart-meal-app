@@ -1,36 +1,104 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+🔧 Tech Stack:
+Frontend: Next.js (App Router), Tailwind CSS
 
-## Getting Started
+State Management: Zustand
 
-First, run the development server:
+Authentication & DB: Supabase (or Firebase)
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+API Integration: Spoonacular or Edamam API
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Charts: Chart.js (with react-chartjs-2)
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Toast Notifications: sonner or react-hot-toast
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+📁 Folder Structure Plan:
+bash
+Copy
+Edit
+/app
+  /dashboard
+  /login
+  /register
+  /recipes
+  /profile
+/components
+  Navbar, RecipeCard, ChartCard, LoadingCard
+/store
+  userStore.ts
+  recipeStore.ts
+/utils
+  fetchRecipes.ts
+  auth.ts
+/lib
+  supabase.ts
+🔐 1. Authentication (Supabase)
+✅ Features:
+Register / Login / Logout
 
-## Learn More
+Auth protected routes (middleware.ts)
 
-To learn more about Next.js, take a look at the following resources:
+User profile storage (avatar, bio, dietary preferences)
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+🔧 Implementation Plan:
+Use @supabase/supabase-js for client SDK
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Create useUserStore in Zustand to manage session & user data
 
-## Deploy on Vercel
+Middleware for route protection:
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+ts
+Copy
+Edit
+export { default } from 'next-auth/middleware';
+export const config = { matcher: ['/dashboard', '/recipes'] }
+Profile Page: Allow updates for display name, dietary filters
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+🧠 2. Recipe Search & Suggestions (API Integration)
+✅ Features:
+Search by ingredient or meal type
+
+Filter by diet (vegan, keto, etc.)
+
+Random AI recipe suggestions
+
+Fetch detailed recipe + nutrition data
+
+🔧 Implementation Plan:
+Use Spoonacular or Edamam API for:
+
+GET /recipes/complexSearch
+
+GET /recipes/{id}/nutritionWidget
+
+Store search term, filters, results in Zustand (useRecipeStore)
+
+Debounced search input + dropdown filters
+
+Display with RecipeCard
+
+📊 3. Nutrition Charts (Chart.js)
+✅ Features:
+Pie chart for macros (carbs, fat, protein)
+
+Bar chart for vitamins/minerals
+
+Calorie breakdown per meal
+
+🔧 Implementation Plan:
+Use react-chartjs-2
+
+Dynamic nutrition data on recipe detail page
+
+Component: <NutritionChart /> and <MacroBreakdown />
+
+💬 4. UI Features
+Typing/loading indicators for AI suggestions
+
+Grouped message/recommendations with timestamps
+
+Loading skeletons for recipe cards
+
+Error fallback UI if API fails
+
+Dark mode toggle
+

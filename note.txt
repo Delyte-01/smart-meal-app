@@ -1,0 +1,95 @@
+// /store/recipeStore.ts
+import { create } from "zustand";
+import { Recipe, fetchRecipes } from "@/lib/spoonacular";
+
+interface RecipeState {
+  recipes: Recipe[];
+  loading: boolean;
+  error: string | null;
+  getRecipes: (query?: string) => Promise<void>;
+}
+
+export const useRecipeStore = create<RecipeState>((set) => ({
+  recipes: [],
+  loading: false,
+  error: null,
+
+  getRecipes: async (query = "") => {
+    try {
+      set({ loading: true, error: null });
+      const data = await fetchRecipes(query);
+      set({ recipes: data, loading: false });
+    } catch (err) {
+      set({ error: (err as Error).message, loading: false });
+    }
+  },
+}));
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// /lib/spoonacular.ts
+const API_KEY = process.env.NEXT_PUBLIC_SPOONACULAR_KEY;
+const BASE_URL = "https://api.spoonacular.com/recipes";
+
+export interface Recipe {
+  id: number;
+  title: string;
+  image: string;
+  readyInMinutes: number;
+  servings: number;
+  spoonacularScore?: number; // rating (0–100)
+  dishTypes?: string[];
+  cuisines?: string[];
+  pricePerServing?: number;
+  summary?: string; // HTML string with description
+  instructions?: string; // may be HTML
+  nutrition?: {
+    nutrients: Nutrient[];
+  };
+}
+export interface Nutrient {
+  name: string; // e.g. "Protein"
+  amount: number; // e.g. 25
+  unit: string; // e.g. "g"
+}
+
+
+export async function fetchRecipes(
+  query: string = "",
+  number: number = 100,
+): Promise<Recipe[]> {
+  const res = await fetch(
+     `${BASE_URL}/complexSearch?query=${query}&number=${number}&addRecipeInformation=true&addRecipeNutrition=true&apiKey=${API_KEY}`,
+    { next: { revalidate: 60 } } // ISR caching for 1 min
+  );
+
+  if (!res.ok) throw new Error("Failed to fetch recipes");
+  const data = await res.json();
+  return data.results;
+}
+
+
+
+
+// "use client"
+// import { mockRecipes } from "@/app/data/recipe";
+// import RecipeDetails from "@/component/recipe-details";
+
+// export default function RecipePage({ params }: { params: { id: string } }) {
+//   const recipe = mockRecipes.find((r) => r.id === parseInt(params.id));
+
+//   if (!recipe) return <p>Recipe not found</p>;
+
+//   return <RecipeDetails recipe={{...recipe, id: recipe.id.toString()}} />;
+// }

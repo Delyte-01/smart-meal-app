@@ -1,0 +1,85 @@
+[
+  {
+    "id": 1,
+    "title": "Grilled Chicken Salad",
+    "description": "A light and refreshing salad with grilled chicken, mixed greens, and vinaigrette.",
+    "image": "/images/recipes/grilled-chicken-salad.jpg",
+    "calories": 350,
+    "protein": 30,
+    "carbs": 15,
+    "fat": 18,
+    "prepTime": "10 mins",
+    "cookTime": "15 mins",
+    "dietType": [
+      "Low Carb",
+      "Gluten Free"
+    ],
+    "mealType": "Lunch"
+  },
+  {
+    "id": 2,
+    "title": "Vegan Buddha Bowl",
+    "description": "A nourishing bowl of quinoa, chickpeas, veggies, and tahini dressing.",
+    "image": "/images/recipes/vegan-buddha-bowl.jpg",
+    "calories": 420,
+    "protein": 20,
+    "carbs": 45,
+    "fat": 12,
+    "prepTime": "15 mins",
+    "cookTime": "20 mins",
+    "dietType": [
+      "Vegan",
+      "Gluten Free"
+    ],
+    "mealType": "Dinner"
+  },
+  {
+    "id": 3,
+    "title": "Overnight Oats",
+    "description": "A quick and easy breakfast made with oats, almond milk, and fresh berries.",
+    "image": "/images/recipes/overnight-oats.jpg",
+    "calories": 280,
+    "protein": 10,
+    "carbs": 40,
+    "fat": 8,
+    "prepTime": "5 mins",
+    "cookTime": "0 mins",
+    "dietType": [
+      "Vegetarian"
+    ],
+    "mealType": "Breakfast"
+  },
+  {
+    "id": 4,
+    "title": "Keto Egg Muffins",
+    "description": "High-protein, low-carb egg muffins perfect for meal prep.",
+    "image": "/images/recipes/keto-egg-muffins.jpg",
+    "calories": 190,
+    "protein": 14,
+    "carbs": 3,
+    "fat": 13,
+    "prepTime": "10 mins",
+    "cookTime": "20 mins",
+    "dietType": [
+      "Keto",
+      "Gluten Free"
+    ],
+    "mealType": "Snack"
+  },
+  {
+    "id": 5,
+    "title": "Shrimp Stir Fry",
+    "description": "Quick shrimp stir fry with colorful vegetables and soy sauce.",
+    "image": "/images/recipes/shrimp-stir-fry.jpg",
+    "calories": 400,
+    "protein": 28,
+    "carbs": 25,
+    "fat": 20,
+    "prepTime": "10 mins",
+    "cookTime": "15 mins",
+    "dietType": [
+      "Pescatarian"
+    ],
+    "mealType": "Dinner"
+  }
+]
