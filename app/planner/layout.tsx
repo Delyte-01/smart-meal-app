@@ -7,7 +7,7 @@ import HeaderNav from "@/component/header-nav";
 
 
 
-export default function LogInLayout({
+export default function PlannerLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;

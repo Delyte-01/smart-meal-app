@@ -27,7 +27,7 @@ export default function MealFilters() {
   const [time, setTime] = useState([0, 60]);
 
   return (
-    <div className="w-full md:w-1/3 p-4 border-r bg-white dark:bg-zinc-900 shadow-sm">
+    <div className="w-full md:w-1/3 p-4 border-r bg-white dark:bg-zinc-900 shadow-sm manrope">
       {/* Mobile Toggle */}
       <div className="md:hidden mb-4">
         <Sheet>

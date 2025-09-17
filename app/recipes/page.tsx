@@ -17,9 +17,9 @@ const RecipePage = () =>
   return (
     <div className="bg-[#f9fafb] min-h-screen p-4 sm:p-6 lg:p-10   ">
       <div className="max-w-6xl mx-auto">
-        <h1 className="text-3xl font-bold mb-6">Explore Recipes</h1>
+        <h1 className="text-3xl font-bold mb-6 dm">Explore Recipes</h1>
         {/* <SearchAndFilterBar onSearch={handleSearch} onFilter={handleFilter} /> */}
-        {loading && <p>Loading recipes...</p>}
+       
         {error && <p className="text-red-500">{error}</p>}
         <div className="flex flex-col md:flex-row gap-4">
           <MealFilters />

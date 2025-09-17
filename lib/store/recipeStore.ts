@@ -2,13 +2,6 @@
 import { create } from "zustand";
 import { Recipe, RecipeFilters, fetchRecipes } from "@/lib/spoonacular";
 
-// Define filter types
-// interface Filters {
-//   cuisine?: string;
-//   diet?: string;
-//   intolerances?: string;
-// }
-
 // Zustand store state & actions
 interface RecipeState {
   recipes: Recipe[];
@@ -48,12 +41,12 @@ export const useRecipeStore = create<RecipeState>((set, get) => ({
   // Update filters (does not auto-fetch yet, you call getRecipes after)
   setFilters: (filters) => {
     set({ filters });
-     get().getRecipes();
+    get().getRecipes();
   },
 
   // Update sorting option
   setSort: (sort) => {
     set({ sort });
-     get().getRecipes();
+    get().getRecipes();
   },
 }));

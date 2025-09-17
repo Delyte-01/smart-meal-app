@@ -90,3 +90,13 @@ export async function fetchRecipes(
   const data = await res.json();
   return data.results;
 }
+
+
+export async function fetchRecipeById(id: number): Promise<Recipe> {
+  const url = `${BASE_URL}/${id}/information?apiKey=${API_KEY}`;
+  const res = await fetch(url, { next: { revalidate: 60 } });
+  if (!res.ok) throw new Error("Failed to fetch recipe details");
+
+  const data = await res.json();
+  return data;
+}

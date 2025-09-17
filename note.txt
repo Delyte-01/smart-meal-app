@@ -93,3 +93,150 @@ export async function fetchRecipes(
 
 //   return <RecipeDetails recipe={{...recipe, id: recipe.id.toString()}} />;
 // }
+
+
+
+
+
+{/* 
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mt-6 text-center bg-gray-100 p-4 rounded-lg">
+              <div>
+                <p className="font-bold">{recipe.nutrition.calories}</p>
+                <p className="text-xs text-gray-500">Calories</p>
+              </div>
+              <div>
+                <p className="font-bold">{recipe.nutrition.protein}g</p>
+                <p className="text-xs text-gray-500">Protein</p>
+              </div>
+              <div>
+                <p className="font-bold">{recipe.nutrition.carbs}g</p>
+                <p className="text-xs text-gray-500">Carbs</p>
+              </div>
+              <div>
+                <p className="font-bold">{recipe.nutrition.fat}g</p>
+                <p className="text-xs text-gray-500">Fat</p>
+              </div>
+            </div> */}
+
+            {/* <div>
+              <h2 className="text-xl font-semibold mt-6 mb-2">Ingredients</h2>
+              <ul className="list-disc list-inside text-gray-700 space-y-1">
+                {recipe.ingredients.map((item, idx) => (
+                  <li key={idx}>{item}</li>
+                ))}
+              </ul>
+            </div>
+
+            <div>
+              <h2 className="text-xl font-semibold mt-6 mb-2">Instructions</h2>
+              <ol className="list-decimal list-inside text-gray-700 space-y-1">
+                {recipe.instructions.map((step, idx) => (
+                  <li key={idx}>{step}</li>
+                ))}
+              </ol>
+            </div> */}
+
+
+
+
+
+
+
+            "use client";
+import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+
+import React from "react";
+import { MealCard } from "@/component/meal-card";
+
+const days = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+const slots = ["Breakfast", "Lunch", "Dinner"];
+
+export default function PlannerPage() {
+  return (
+    <div className="w-full p-4">
+      {/* Desktop Table Layout */}
+      <div className="hidden md:grid grid-cols-[100px_repeat(7,minmax(0,1fr))] gap-2">
+        {/* Top row - days */}
+        <div /> {/* empty top-left corner */}
+        {days.map((day) => (
+          <div
+            key={day}
+            className="text-center font-semibold text-sm text-muted-foreground"
+          >
+            {day}
+          </div>
+        ))}
+        {/* Rows for slots */}
+        {slots.map((slot) => (
+          <React.Fragment key={slot}>
+            {/* Slot label */}
+            <div className="font-medium text-sm flex items-center justify-start">
+              {slot}
+            </div>
+
+            {/* Grid cells */}
+            {days.map((day) => (
+              <Card
+                key={`${day}-${slot}`}
+                className="h-28 flex flex-col justify-center items-center hover:shadow-md transition"
+              >
+                <CardContent className="p-2 w-full h-full flex flex-col justify-center items-center">
+                  <MealCard
+                    title="Chicken Salad"
+                    image="https://spoonacular.com/recipeImages/12345-312x231.jpg"
+                    calories={420}
+                    onRemove={() => console.log("remove meal")}
+                  />
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="text-muted-foreground text-xs"
+                  >
+                    + Add
+                  </Button>
+                </CardContent>
+              </Card>
+            ))}
+          </React.Fragment>
+        ))}
+      </div>
+
+      {/* Mobile Layout - stack by day */}
+      <div className="md:hidden flex flex-col gap-6">
+        {days.map((day) => (
+          <div key={day} className="border rounded-lg p-3">
+            <h3 className="font-semibold mb-2">{day}</h3>
+            <div className="flex flex-col gap-3">
+              {slots.map((slot) => (
+                <Card
+                  key={`${day}-${slot}`}
+                  className="flex flex-col hover:shadow-md transition"
+                >
+                  <CardContent className="p-2 flex flex-col gap-1">
+                    <span className="text-xs font-medium text-muted-foreground">
+                      {slot}
+                    </span>
+                    <MealCard
+                      title="Chicken Salad"
+                      image="https://spoonacular.com/recipeImages/12345-312x231.jpg"
+                      calories={420}
+                      onRemove={() => console.log("remove meal")}
+                    />
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="text-muted-foreground text-xs"
+                    >
+                      + Add
+                    </Button>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}

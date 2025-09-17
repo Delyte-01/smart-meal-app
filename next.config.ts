@@ -1,7 +1,6 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  /* config options here */
   eslint: {
     ignoreDuringBuilds: true, // Disables ESLint during builds
   },
@@ -12,6 +11,16 @@ const nextConfig: NextConfig = {
         hostname: "res.cloudinary.com",
         pathname: "/**",
       },
+      {
+        protocol: "https",
+        hostname: "img.spoonacular.com",
+        pathname: "/**",
+      },
+      {
+        protocol: "https",
+        hostname: "spoonacular.com",
+        pathname: "/**",
+      }
     ],
   },
 };

@@ -2,6 +2,10 @@
 
 import { useState } from "react";
 import RecipeCard from "../recipe-card";
+import { useRecipeStore } from "@/lib/store/recipeStore";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Button } from "@/components/ui/button";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 
 interface SpoonacularRecipe {
   id: number;
@@ -26,6 +30,7 @@ const ITEMS_PER_PAGE = 6;
 
 export default function RecipeGrid({ recipes }: RecipeGridProps) {
   const [currentPage, setCurrentPage] = useState(1);
+  const { loading, error } = useRecipeStore();
 
   const totalPages = Math.ceil(recipes.length / ITEMS_PER_PAGE);
 
@@ -83,11 +88,23 @@ export default function RecipeGrid({ recipes }: RecipeGridProps) {
             );
           })}
         </div>
+        {loading &&  Array.from({ length: ITEMS_PER_PAGE }).map((_, index) => (
+          <div key={index} className="p-4">
+            <Skeleton className="h-full w-full rounded-lg" />
+          </div>
+        ))
+         
+        }
+        {error && (
+          <div className="flex justify-center items-center py-4">
+            <span className="text-red-500">{error}</span>
+          </div>
+        )}
 
         {/* Pagination Controls */}
         {totalPages > 1 && (
           <div className="flex justify-center items-center gap-4 py-4">
-            <button
+            <Button
               onClick={handlePrev}
               disabled={currentPage === 1}
               className={`px-4 py-2 rounded-md text-white ${
@@ -96,14 +113,14 @@ export default function RecipeGrid({ recipes }: RecipeGridProps) {
                   : "bg-primary hover:bg-primary/80"
               }`}
             >
-              Previous
-            </button>
+              <ChevronLeft className="h-4 w-4" />
+            </Button>
 
             <span className="text-sm text-gray-700">
               Page {currentPage} of {totalPages}
             </span>
 
-            <button
+            <Button
               onClick={handleNext}
               disabled={currentPage === totalPages}
               className={`px-4 py-2 rounded-md text-white ${
@@ -112,8 +129,8 @@ export default function RecipeGrid({ recipes }: RecipeGridProps) {
                   : "bg-primary hover:bg-primary/80"
               }`}
             >
-              Next
-            </button>
+              <ChevronRight className="h-4 w-4 " />
+            </Button>
           </div>
         )}
       </div>
