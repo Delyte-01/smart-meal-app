@@ -9,12 +9,10 @@ import {
   Utensils,
   CalendarClock,
   HeartPulse,
-
 } from "lucide-react";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { cn } from "@/lib/utils"; // optional: utility to join classNames
 import { supabase } from "@/lib/suparbaseClient";
 import Image from "next/image";
 
@@ -45,27 +43,27 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
     },
     {
       name: "Recipes",
-      href: "/recipes",
+      href: "/dashboard/recipes",
       icon: <Utensils className="w-5 h-5" />,
     },
     {
       name: "Planner",
-      href: "/planner",
+      href: "/dashboard/planner",
       icon: <CalendarClock className="w-5 h-5" />,
     },
     {
       name: "Favorites",
-      href: "/favorites",
+      href: "/dashboard/favorites",
       icon: <HeartPulse className="w-5 h-5" />,
     },
     {
       name: "Profile",
-      href: "/profile",
+      href: "/dashboard/profile",
       icon: <CircleUserRound className="w-5 h-5" />,
     },
     {
       name: "Settings",
-      href: "/settings",
+      href: "/dashboard/settings",
       icon: <Settings className="w-5 h-5" />,
     },
   ];

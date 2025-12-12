@@ -9,6 +9,7 @@ const RecipeDetailsPage = async ({
   const { id } = await params;
 
   const recipe = await fetchRecipeById(Number(id));
+  console.log( recipe);
 
   if (!recipe) {
     return <div className="text-center">Loading recipe details...</div>;

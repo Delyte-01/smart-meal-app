@@ -18,6 +18,8 @@ import { WeeklyCalendar } from "@/component/meal-planner/weekly-calendar";
 import { RecipeLibrary } from "@/component/meal-planner/recipe-library";
 import { AddRecipeModal } from "@/component/meal-planner/add-recipe-modal";
 import { ShareMealPlanModal } from "@/component/meal-planner/share-meal-plan";
+import { useMealPlanStore } from "@/lib/store/mealPlan";
+// import { Recipe } from "@/types/recipe";
 
 // import { NutritionSummary } from "@/components/meal-planner/nutrition-summary";
 
@@ -170,48 +172,46 @@ export default function MealPlannerPage() {
     day: string;
     mealType: string;
   } | null>(null);
-  const [showAddRecipeModal, setShowAddRecipeModal] = useState(false);
+
+  // const [showAddRecipeModal, setShowAddRecipeModal] = useState(true);
   const [showShareModal, setShowShareModal] = useState(false);
   const [activeView, setActiveView] = useState<"calendar" | "library">(
     "calendar"
   );
 
-  const addRecipeToSlot = useCallback(
-    (day: string, mealType: string, recipe: Recipe) => {
-      setMealPlan((prev) => ({
-        ...prev,
-        [day]: {
-          ...prev[day],
-          [mealType]: recipe,
-        },
-      }));
-    },
-    []
-  );
+  // const addRecipeToSlot = useCallback(
+  //   (day: string, mealType: string, recipe: Recipe) => {
+  //     setMealPlan((prev) => ({
+  //       ...prev,
+  //       [day]: {
+  //         ...prev[day],
+  //         [mealType]: recipe,
+  //       },
+  //     }));
+  //   },
+  //   []
+  // );
 
-  const removeRecipeFromSlot = useCallback((day: string, mealType: string) => {
-    setMealPlan((prev) => ({
-      ...prev,
-      [day]: {
-        ...prev[day],
-        [mealType]: null,
-      },
-    }));
-  }, []);
+  // const removeRecipeFromSlot = useCallback((day: string, mealType: string) => {
+  //   setMealPlan((prev) => ({
+  //     ...prev,
+  //     [day]: {
+  //       ...prev[day],
+  //       [mealType]: null,
+  //     },
+  //   }));
+  // }, []);
 
-  const handleSlotClick = (day: string, mealType: string) => {
-    setSelectedSlot({ day, mealType });
-    setShowAddRecipeModal(true);
-  };
+  // const handleSlotClick = (day: string, mealType: string) => {
+  //   setSelectedSlot({ day, mealType });
+  //   setShowAddRecipeModal(true);
+  // };
 
-  const handleAddRecipe = (recipe: Recipe) => {
-    if (selectedSlot) {
-      addRecipeToSlot(selectedSlot.day, selectedSlot.mealType, recipe);
-      setShowAddRecipeModal(false);
-      // wait until Dialog finishes unmounting before clearing slot
-      setSelectedSlot(null);
-    }
-  };
+  // const handleAddRecipe = (day: string, mealType: string, recipe: any) => {
+  //   setRecipe(day, mealType, recipe);
+  //   setShowAddRecipeModal(false);
+  //   setSelectedSlot(null);
+  // };
 
   const getWeekDates = (date: Date) => {
     const week = [];
@@ -336,10 +336,10 @@ export default function MealPlannerPage() {
                 <TabsContent value="calendar" className="mt-6">
                   <WeeklyCalendar
                     weekDates={weekDates}
-                    mealPlan={mealPlan}
-                    onSlotClick={handleSlotClick}
-                    onRemoveRecipe={removeRecipeFromSlot}
-                    onAddRecipe={addRecipeToSlot}
+                    // mealPlan={mealPlan}
+                    // onSlotClick={handleSlotClick}
+                    // onRemoveRecipe={removeRecipeFromSlot}
+                    // onAddRecipe={addRecipeToSlot}
                   />
                 </TabsContent>
                 <TabsContent value="library" className="mt-6">
@@ -352,10 +352,10 @@ export default function MealPlannerPage() {
             <div className="hidden xl:block xl:col-span-3 ">
               <WeeklyCalendar
                 weekDates={weekDates}
-                mealPlan={mealPlan}
-                onSlotClick={handleSlotClick}
-                onRemoveRecipe={removeRecipeFromSlot}
-                onAddRecipe={addRecipeToSlot}
+                // mealPlan={mealPlan}
+                // onSlotClick={handleSlotClick}
+                // onRemoveRecipe={removeRecipeFromSlot}
+                // onAddRecipe={addRecipeToSlot}
               />
             </div>
 
@@ -372,17 +372,17 @@ export default function MealPlannerPage() {
       </div>
 
       {/* Modals */}
-      {showAddRecipeModal && selectedSlot && (
+      {/* {showAddRecipeModal &&  ( */}
         <AddRecipeModal
-          onClose={() => {
-            setShowAddRecipeModal(false);
-            setSelectedSlot(null);
-          }}
-          onAddRecipe={handleAddRecipe}
+          // onClose={() => {
+          //   setShowAddRecipeModal(false);
+            // setSelectedSlot(null);
+          // }}
+          // onAddRecipe={handleAddRecipe}
           recipes={mockSavedRecipes}
-          selectedSlot={selectedSlot}
+          // selectedSlot={selectedSlot}
         />
-      )}
+      {/* )} */}
 
       {showShareModal && (
           <ShareMealPlanModal

@@ -18,6 +18,9 @@ import { Key, PlusCircle } from "lucide-react";
 import Link from "next/link";
 import { Card, CardContent } from "@/components/ui/card";
 import { steps } from "framer-motion";
+import { useMealPlanStore } from "@/lib/store/mealPlan";
+import { useRouter } from "next/navigation";
+
 
 ChartJS.register(
   CategoryScale,
@@ -40,7 +43,17 @@ export default function RecipeDetails({ recipe }: { recipe: Recipe }) {
     ],
   };
   console.log(recipe);
+  const router = useRouter();
   const filterScore = Math.round(recipe.spoonacularScore || 0);
+  const addRecipeToSlot = useMealPlanStore((state) => state.setRecipe);
+  
+    const handleAddToPlanner = () => {
+    // Example: add to Monday Lunch by default
+    addRecipeToSlot("Monday", "Lunch", recipe);
+    // Redirect to planner page
+    router.push("/dashboard/planner");
+  };
+
  
 
   return (
@@ -79,11 +92,11 @@ export default function RecipeDetails({ recipe }: { recipe: Recipe }) {
               </div>
             </div>
 
-            <Link href={"/"}>
-              <Button>
-                Add To Plan <PlusCircle />{" "}
-              </Button>
-            </Link>
+            {/* <Link href={"/"}> */}
+            <Button onClick={ handleAddToPlanner}>
+              Add To Plan <PlusCircle />{" "}
+            </Button>
+            {/* </Link> */}
           </div>
         </div>
 

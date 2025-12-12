@@ -3,7 +3,8 @@ import "./globals.css";
 
 import SmoothScroll from "@/component/lenis-smooth-scroll";
 import { Toaster } from "@/components/ui/sonner";
-import SupabaseProvider from "@/lib/providers/supabase-provider";
+import { SupabaseProvider } from "@/lib/providers/supabase-provider";
+
 
 export const metadata: Metadata = {
   title: "Smart Meal",
@@ -17,13 +18,13 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body >
-        {/* <SmoothScroll>     */}
+      <body>
         <SupabaseProvider>
+          {/* <SmoothScroll>     */}
           {children}
-          <Toaster richColors closeButton />
+          {/* </SmoothScroll> */}
         </SupabaseProvider>
-        {/* </SmoothScroll> */}
+        <Toaster richColors closeButton />
       </body>
     </html>
   );

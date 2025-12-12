@@ -6,37 +6,37 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import type { Recipe } from "@/app/planner/page";
 import Image from "next/image";
+import { useRecipeModal } from "@/lib/store/recipeModal";
+import type { Recipe } from "@/app/dashboard/planner/page";
+import { useMealPlanStore } from "@/lib/store/mealPlan";
 
 interface AddRecipeModalProps {
-  onClose: () => void;
-  onAddRecipe: (recipe: Recipe) => void;
   recipes: Recipe[];
-  selectedSlot: { day: string; mealType: string };
+  // onAddRecipe: (day: string, mealType: string, recipe: Recipe) => void;
 }
 
-export function AddRecipeModal({
-  onClose,
-  onAddRecipe,
-  recipes,
-  selectedSlot,
-}: AddRecipeModalProps) {
+export function AddRecipeModal({ recipes }: AddRecipeModalProps) {
+  const { isOpen, closeModal, day, mealType } = useRecipeModal();
+  const setRecipe = useMealPlanStore((s) => s.setRecipe);
   const [searchQuery, setSearchQuery] = useState("");
 
+  if (!isOpen || !day || !mealType) return null;
+
+  // ✅ Filter recipes by search + mealType
   const filteredRecipes = recipes.filter((recipe) => {
     const matchesSearch = recipe.title
       .toLowerCase()
       .includes(searchQuery.toLowerCase());
     const matchesMealType = recipe.mealType.some(
-      (type) => type.toLowerCase() === selectedSlot.mealType.toLowerCase()
+      (type) => type.toLowerCase() === mealType.toLowerCase()
     );
     return matchesSearch && (searchQuery || matchesMealType);
   });
 
-  const handleAddRecipe = (recipe: Recipe) => {
-    onAddRecipe(recipe);
-    onClose();
+  const handleAddRecipe = (recipe: any) => {
+    setRecipe(day, mealType, recipe);
+    closeModal();
   };
 
   return (
@@ -44,7 +44,7 @@ export function AddRecipeModal({
       {/* Backdrop */}
       <div
         className="absolute inset-0 bg-black/50 backdrop-blur-sm"
-        onClick={onClose}
+        onClick={closeModal}
       />
 
       {/* Modal */}
@@ -52,12 +52,11 @@ export function AddRecipeModal({
         {/* Header */}
         <div className="flex justify-between items-center px-6 py-4 border-b">
           <h2 className="text-lg font-semibold">
-            Add Recipe to {selectedSlot.day}{" "}
-            {selectedSlot.mealType.charAt(0).toUpperCase() +
-              selectedSlot.mealType.slice(1)}
+            Add Recipe to {day}{" "}
+            {mealType.charAt(0).toUpperCase() + mealType.slice(1)}
           </h2>
           <button
-            onClick={onClose}
+            onClick={closeModal}
             className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-neutral-800"
           >
             <X className="w-5 h-5" />
@@ -90,9 +89,9 @@ export function AddRecipeModal({
                       <Image
                         src={recipe.image || "/placeholder.svg"}
                         alt={recipe.title}
-                        className="w-16 h-16 rounded-full shadow-sm ring-4 ring-green-200 object-cover flex-shrink-0 "
                         width={64}
                         height={64}
+                        className="w-16 h-16 rounded-full shadow-sm ring-4 ring-green-200 object-cover flex-shrink-0"
                       />
                       <div className="flex-1 min-w-0">
                         <h3 className="font-semibold mb-2">{recipe.title}</h3>

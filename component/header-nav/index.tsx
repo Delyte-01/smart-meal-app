@@ -1,4 +1,5 @@
 "use client";
+import { useUserProfile } from "@/hooks/profile";
 import { Bell, Menu, Search } from "lucide-react";
 import Image from "next/image";
 import React, { useState } from "react";
@@ -10,6 +11,9 @@ interface HeaderNavProps {
 
 const HeaderNav = ({ sidebarOpen, setSidebarOpen }: HeaderNavProps) => {
   const [showSearch, setShowSearch] = useState(false);
+  const { profile, loading } = useUserProfile();
+
+  if (!profile) return null;
 
   return (
     <header className="sticky top-0 z-10 shadow p-4 w-full px-4 md:px-6 bg-gradient-to-r from-[#fcfaf8] via-[#f1ecee] to-[#faf3f5] backdrop-blur-md border-b border-gray-200 rounded-t-2xl">
@@ -22,7 +26,6 @@ const HeaderNav = ({ sidebarOpen, setSidebarOpen }: HeaderNavProps) => {
           >
             {!sidebarOpen && <Menu />}
           </button>
-          
         </div>
 
         {/* Center: Search */}
@@ -50,19 +53,24 @@ const HeaderNav = ({ sidebarOpen, setSidebarOpen }: HeaderNavProps) => {
             <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
           </button>
 
-          <div className="hidden md:flex items-center gap-2">
+          <div className="flex items-center gap-2">
             <Image
-              src="https://res.cloudinary.com/dk5mfu099/image/upload/v1746600553/2d4e3c4ddee47bbb4418cde62a68b01bb316e9e7_opvt3j.jpg"
-              alt="User Avatar"
+              src={profile.avatar_url}
+              alt={profile.full_name}
               width={40}
               height={40}
-              className="rounded-full border border-gray-200 object-cover w-10 h-10"
+              className="rounded-full border border-gray-200 object-cover w-10 h-10 shadow-sm ring-4 ring-white"
             />
             <div className="flex flex-col">
               <span className="text-sm font-medium text-gray-800">
-                Delyte 😎
+                {profile.full_name}
               </span>
-              <span className="text-xs text-gray-500">Frontend Dev</span>
+              {loading && (
+                <span className="text-xs text-gray-500 animate-pulse">
+                  Loading...
+                </span>
+              )}
+              {/* <span className="text-xs text-gray-500">Frontend Dev</span> */}
             </div>
           </div>
         </div>

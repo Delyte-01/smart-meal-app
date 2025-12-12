@@ -1,9 +1,7 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  eslint: {
-    ignoreDuringBuilds: true, // Disables ESLint during builds
-  },
+
   images: {
     remotePatterns: [
       {
@@ -20,8 +18,14 @@ const nextConfig: NextConfig = {
         protocol: "https",
         hostname: "spoonacular.com",
         pathname: "/**",
+      }, {
+        protocol: "https",
+        hostname: "lh3.googleusercontent.com",
+        pathname: "/**",
       }
     ],
+  }, experimental: {
+    middlewarePrefetch: "flexible",
   },
 };
 

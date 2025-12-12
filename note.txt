@@ -1,242 +1,315 @@
-// /store/recipeStore.ts
-import { create } from "zustand";
-import { Recipe, fetchRecipes } from "@/lib/spoonacular";
+"use client";
 
-interface RecipeState {
-  recipes: Recipe[];
-  loading: boolean;
-  error: string | null;
-  getRecipes: (query?: string) => Promise<void>;
-}
-
-export const useRecipeStore = create<RecipeState>((set) => ({
-  recipes: [],
-  loading: false,
-  error: null,
-
-  getRecipes: async (query = "") => {
-    try {
-      set({ loading: true, error: null });
-      const data = await fetchRecipes(query);
-      set({ recipes: data, loading: false });
-    } catch (err) {
-      set({ error: (err as Error).message, loading: false });
-    }
-  },
-}));
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-// /lib/spoonacular.ts
-const API_KEY = process.env.NEXT_PUBLIC_SPOONACULAR_KEY;
-const BASE_URL = "https://api.spoonacular.com/recipes";
-
-export interface Recipe {
-  id: number;
-  title: string;
-  image: string;
-  readyInMinutes: number;
-  servings: number;
-  spoonacularScore?: number; // rating (0–100)
-  dishTypes?: string[];
-  cuisines?: string[];
-  pricePerServing?: number;
-  summary?: string; // HTML string with description
-  instructions?: string; // may be HTML
-  nutrition?: {
-    nutrients: Nutrient[];
-  };
-}
-export interface Nutrient {
-  name: string; // e.g. "Protein"
-  amount: number; // e.g. 25
-  unit: string; // e.g. "g"
-}
-
-
-export async function fetchRecipes(
-  query: string = "",
-  number: number = 100,
-): Promise<Recipe[]> {
-  const res = await fetch(
-     `${BASE_URL}/complexSearch?query=${query}&number=${number}&addRecipeInformation=true&addRecipeNutrition=true&apiKey=${API_KEY}`,
-    { next: { revalidate: 60 } } // ISR caching for 1 min
-  );
-
-  if (!res.ok) throw new Error("Failed to fetch recipes");
-  const data = await res.json();
-  return data.results;
-}
-
-
-
-
-// "use client"
-// import { mockRecipes } from "@/app/data/recipe";
-// import RecipeDetails from "@/component/recipe-details";
-
-// export default function RecipePage({ params }: { params: { id: string } }) {
-//   const recipe = mockRecipes.find((r) => r.id === parseInt(params.id));
-
-//   if (!recipe) return <p>Recipe not found</p>;
-
-//   return <RecipeDetails recipe={{...recipe, id: recipe.id.toString()}} />;
-// }
-
-
-
-
-
-{/* 
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mt-6 text-center bg-gray-100 p-4 rounded-lg">
-              <div>
-                <p className="font-bold">{recipe.nutrition.calories}</p>
-                <p className="text-xs text-gray-500">Calories</p>
-              </div>
-              <div>
-                <p className="font-bold">{recipe.nutrition.protein}g</p>
-                <p className="text-xs text-gray-500">Protein</p>
-              </div>
-              <div>
-                <p className="font-bold">{recipe.nutrition.carbs}g</p>
-                <p className="text-xs text-gray-500">Carbs</p>
-              </div>
-              <div>
-                <p className="font-bold">{recipe.nutrition.fat}g</p>
-                <p className="text-xs text-gray-500">Fat</p>
-              </div>
-            </div> */}
-
-            {/* <div>
-              <h2 className="text-xl font-semibold mt-6 mb-2">Ingredients</h2>
-              <ul className="list-disc list-inside text-gray-700 space-y-1">
-                {recipe.ingredients.map((item, idx) => (
-                  <li key={idx}>{item}</li>
-                ))}
-              </ul>
-            </div>
-
-            <div>
-              <h2 className="text-xl font-semibold mt-6 mb-2">Instructions</h2>
-              <ol className="list-decimal list-inside text-gray-700 space-y-1">
-                {recipe.instructions.map((step, idx) => (
-                  <li key={idx}>{step}</li>
-                ))}
-              </ol>
-            </div> */}
-
-
-
-
-
-
-
-            "use client";
-import { Card, CardContent } from "@/components/ui/card";
+import { useState } from "react";
+import { Slider } from "@/components/ui/slider";
 import { Button } from "@/components/ui/button";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Checkbox } from "@/components/ui/checkbox";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet";
+import { Filter, ChefHat, Clock, Flame, X } from "lucide-react";
+import { useRecipeStore } from "@/lib/store/recipeStore";
 
-import React from "react";
-import { MealCard } from "@/component/meal-card";
+export default function MealFilters() {
+  const { setFilters, setSort, getRecipes } = useRecipeStore();
 
-const days = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
-const slots = ["Breakfast", "Lunch", "Dinner"];
+  const [calories, setCalories] = useState<[number, number]>([0, 800]);
+  const [time, setTime] = useState<[number, number]>([0, 60]);
+  const [selectedCuisine, setSelectedCuisine] = useState<string | null>(null);
+  const [selectedDiet, setSelectedDiet] = useState<string | null>(null);
+  const [selectedIntolerances, setSelectedIntolerances] = useState<string[]>(
+    []
+  );
+  const [selectedMealType, setSelectedMealType] = useState<string | null>(null);
+  const [selectedSort, setSelectedSort] = useState<string | null>(null);
 
-export default function PlannerPage() {
-  return (
-    <div className="w-full p-4">
-      {/* Desktop Table Layout */}
-      <div className="hidden md:grid grid-cols-[100px_repeat(7,minmax(0,1fr))] gap-2">
-        {/* Top row - days */}
-        <div /> {/* empty top-left corner */}
-        {days.map((day) => (
-          <div
-            key={day}
-            className="text-center font-semibold text-sm text-muted-foreground"
+  const handleApply = () => {
+    setFilters({
+      cuisine: selectedCuisine || "",
+      diet: selectedDiet || "",
+      intolerances: selectedIntolerances.join(","),
+      mealType: selectedMealType || "",
+      calories,
+      time,
+    });
+    if (selectedSort) {
+      setSort(selectedSort);
+    }
+    getRecipes();
+  };
+
+  const handleReset = () => {
+    setCalories([0, 800]);
+    setTime([0, 60]);
+    setSelectedCuisine(null);
+    setSelectedDiet(null);
+    setSelectedIntolerances([]);
+    setSelectedMealType(null);
+    setSelectedSort(null);
+    setFilters({});
+    setSort("");
+    getRecipes();
+  };
+
+  const FilterContent = () => (
+    <div className="space-y-8 py-6">
+      {/* Cuisine */}
+      <div>
+        <label className="text-lg font-semibold flex items-center gap-2 mb-3">
+          <ChefHat className="h-5 w-5 text-indigo-600" />
+          Cuisine
+        </label>
+        <div className="flex gap-2 items-center">
+          <Select
+            onValueChange={(val) => setSelectedCuisine(val)}
+            value={selectedCuisine || ""}
           >
-            {day}
-          </div>
-        ))}
-        {/* Rows for slots */}
-        {slots.map((slot) => (
-          <React.Fragment key={slot}>
-            {/* Slot label */}
-            <div className="font-medium text-sm flex items-center justify-start">
-              {slot}
-            </div>
-
-            {/* Grid cells */}
-            {days.map((day) => (
-              <Card
-                key={`${day}-${slot}`}
-                className="h-28 flex flex-col justify-center items-center hover:shadow-md transition"
-              >
-                <CardContent className="p-2 w-full h-full flex flex-col justify-center items-center">
-                  <MealCard
-                    title="Chicken Salad"
-                    image="https://spoonacular.com/recipeImages/12345-312x231.jpg"
-                    calories={420}
-                    onRemove={() => console.log("remove meal")}
-                  />
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="text-muted-foreground text-xs"
-                  >
-                    + Add
-                  </Button>
-                </CardContent>
-              </Card>
-            ))}
-          </React.Fragment>
-        ))}
+            <SelectTrigger className="w-full h-12">
+              <SelectValue placeholder="Any cuisine" />
+            </SelectTrigger>
+            <SelectContent>
+              {[
+                "Italian",
+                "Mexican",
+                "Indian",
+                "Chinese",
+                "Japanese",
+                "Thai",
+                "Mediterranean",
+                "French",
+              ].map((c) => (
+                <SelectItem key={c} value={c.toLowerCase()}>
+                  {c}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          {selectedCuisine && (
+            <button
+              onClick={() => setSelectedCuisine(null)}
+              className="p-2 hover:bg-gray-100 rounded"
+            >
+              <X className="h-4 w-4" />
+            </button>
+          )}
+        </div>
       </div>
 
-      {/* Mobile Layout - stack by day */}
-      <div className="md:hidden flex flex-col gap-6">
-        {days.map((day) => (
-          <div key={day} className="border rounded-lg p-3">
-            <h3 className="font-semibold mb-2">{day}</h3>
-            <div className="flex flex-col gap-3">
-              {slots.map((slot) => (
-                <Card
-                  key={`${day}-${slot}`}
-                  className="flex flex-col hover:shadow-md transition"
-                >
-                  <CardContent className="p-2 flex flex-col gap-1">
-                    <span className="text-xs font-medium text-muted-foreground">
-                      {slot}
-                    </span>
-                    <MealCard
-                      title="Chicken Salad"
-                      image="https://spoonacular.com/recipeImages/12345-312x231.jpg"
-                      calories={420}
-                      onRemove={() => console.log("remove meal")}
-                    />
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="text-muted-foreground text-xs"
-                    >
-                      + Add
-                    </Button>
-                  </CardContent>
-                </Card>
+      {/* Diet */}
+      <div>
+        <label className="text-lg font-semibold mb-3 block">Diet</label>
+        <div className="flex gap-2 items-center">
+          <Select
+            onValueChange={(val) => setSelectedDiet(val)}
+            value={selectedDiet || ""}
+          >
+            <SelectTrigger className="w-full h-12">
+              <SelectValue placeholder="No preference" />
+            </SelectTrigger>
+            <SelectContent>
+              {[
+                "Vegetarian",
+                "Vegan",
+                "Keto",
+                "Paleo",
+                "Gluten Free",
+                "Dairy Free",
+              ].map((d) => (
+                <SelectItem key={d} value={d.toLowerCase()}>
+                  {d}
+                </SelectItem>
               ))}
-            </div>
-          </div>
-        ))}
+            </SelectContent>
+          </Select>
+          {selectedDiet && (
+            <button
+              onClick={() => setSelectedDiet(null)}
+              className="p-2 hover:bg-gray-100 rounded"
+            >
+              <X className="h-4 w-4" />
+            </button>
+          )}
+        </div>
+      </div>
+
+      {/* Intolerances */}
+      <div>
+        <label className="text-lg font-semibold mb-3 block">
+          Allergies & Intolerances
+        </label>
+        <div className="grid grid-cols-2 gap-3">
+          {["Gluten", "Dairy", "Egg", "Peanut", "Soy", "Shellfish"].map(
+            (item) => (
+              <label
+                key={item}
+                className="flex items-center gap-3 cursor-pointer p-3 rounded-lg hover:bg-gray-50 transition"
+              >
+                <Checkbox
+                  checked={selectedIntolerances.includes(item.toLowerCase())}
+                  onCheckedChange={(checked) => {
+                    if (checked) {
+                      setSelectedIntolerances([
+                        ...selectedIntolerances,
+                        item.toLowerCase(),
+                      ]);
+                    } else {
+                      setSelectedIntolerances(
+                        selectedIntolerances.filter(
+                          (i) => i !== item.toLowerCase()
+                        )
+                      );
+                    }
+                  }}
+                />
+                <span className="text-sm font-medium">{item}</span>
+              </label>
+            )
+          )}
+        </div>
+      </div>
+
+      {/* Calories Slider */}
+      <div>
+        <label className="text-lg font-semibold flex items-center gap-2 mb-4">
+          <Flame className="h-5 w-5 text-orange-600" />
+          Max Calories
+        </label>
+        <Slider
+          value={calories}
+          onValueChange={(val) => setCalories(val as [number, number])}
+          max={1200}
+          step={50}
+          className="mb-2"
+        />
+        <div className="flex justify-between text-sm text-gray-600">
+          <span>{calories[0]} cal</span>
+          <span>{calories[1]} cal</span>
+        </div>
+      </div>
+
+      {/* Time Slider */}
+      <div>
+        <label className="text-lg font-semibold flex items-center gap-2 mb-4">
+          <Clock className="h-5 w-5 text-teal-600" />
+          Max Cooking Time
+        </label>
+        <Slider
+          value={time}
+          onValueChange={(val)=> setTime(val as [number, number])}
+          max={120} 
+          step={5}
+          className="mb-2"
+        />
+        <div className="flex justify-between text-sm text-gray-600">
+          <span>{time[0]} min</span>
+          <span>{time[1]} min</span>
+        </div>
+      </div>
+
+      {/* Sort */}
+      <div>
+        <label className="text-lg font-semibold mb-3 block">Sort By</label>
+        <div className="flex gap-2 items-center">
+          <Select
+            onValueChange={(val) => setSelectedSort(val)}
+            value={selectedSort || ""}
+          >
+            <SelectTrigger className="w-full h-12">
+              <SelectValue placeholder="Choose sorting" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Best match</SelectItem>
+              <SelectItem value="popularity">Most Popular</SelectItem>
+              <SelectItem value="healthiness">Healthiest First</SelectItem>
+              <SelectItem value="time">Fastest</SelectItem>
+              <SelectItem value="calories">Lowest Calories</SelectItem>
+            </SelectContent>
+          </Select>
+          {selectedSort && (
+            <button
+              onClick={() => setSelectedSort(null)}
+              className="p-2 hover:bg-gray-100 rounded"
+            >
+              <X className="h-4 w-4" />
+            </button>
+          )}
+        </div>
+      </div>
+
+      {/* Buttons */}
+      <div className="flex flex-col gap-3 pt-6 border-t">
+        <Button
+          onClick={handleApply}
+          className="w-full h-12 text-lg font-bold bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700"
+        >
+          Apply Filters
+        </Button>
+        <Button variant="outline" onClick={handleReset} className="w-full h-12">
+          Reset All
+        </Button>
       </div>
     </div>
+  );
+
+  return (
+    <>
+      {/* Mobile: Sheet Filter */}
+      <div className="md:hidden mb-6">
+        <Sheet>
+          <SheetTrigger asChild>
+            <Button
+              variant="outline"
+              size="lg"
+              className="w-full flex items-center justify-center gap-3"
+            >
+              <Filter className="h-5 w-5" />
+              <span className="font-semibold">Filters & Sorting</span>
+              <span className="ml-auto text-sm text-gray-500">
+                {(selectedCuisine ||
+                  selectedDiet ||
+                  selectedIntolerances.length > 0 ||
+                  selectedMealType ||
+                  calories[0] !== 0 ||
+                  calories[1] !== 800 ||
+                  time[0] !== 0 ||
+                  time[1] !== 60 ||
+                  selectedSort) &&
+                  "Active"}
+              </span>
+            </Button>
+          </SheetTrigger>
+          <SheetContent side="left" className="w-11/12 sm:w-96 overflow-y-auto">
+            <SheetHeader className="text-left mb-6">
+              <SheetTitle className="text-2xl font-bold">
+                Refine Your Search
+              </SheetTitle>
+            </SheetHeader>
+            <FilterContent />
+          </SheetContent>
+        </Sheet>
+      </div>
+
+      {/* Desktop: Sticky Sidebar */}
+      <div className="hidden md:block w-full lg:w-80 xl:w-96">
+        <div className="sticky top-6 bg-white rounded-2xl shadow-xl p-8 border border-gray-100">
+          <h2 className="text-2xl font-bold mb-8 flex items-center gap-3">
+            <Filter className="h-6 w-6 text-indigo-600" />
+            Filters
+          </h2>
+          <FilterContent />
+        </div>
+      </div>
+    </>
   );
 }

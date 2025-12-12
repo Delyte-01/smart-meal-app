@@ -6,15 +6,18 @@ import { Button } from "@/components/ui/button";
 import DashboardStats from "@/component/dashboard-stats";
 import WeeklyMealPlan from "@/component/weekly-plans";
 import GroceryListPreview from "@/component/grocesary-list-preview";
-import {NutritionSummary} from "@/component/nutrition-summary";
+import { NutritionSummary } from "@/component/nutrition-summary";
 import { SuggestedMeals } from "@/component/suggested-meal";
 import { RecentActivity } from "@/component/recent-activity";
-import { Droplets, Calendar, Target, Siren as Fire, ChefHat } from "lucide-react";
+import {
+  Droplets,
+  Calendar,
+  Target,
+  Siren as Fire,
+  ChefHat,
+} from "lucide-react";
 import RecipeCard from "@/component/recipe-card";
 import { mockRecipes } from "../data/recipe";
-
-
-
 
 // const mockRecipes = [
 //   {
@@ -59,23 +62,46 @@ import { mockRecipes } from "../data/recipe";
 // ];
 
 const nutritionData = [
-  { name: 'Calories', value: 1847, target: 2200, color: 'text-red-500', bgColor: 'bg-red-100' },
-  { name: 'Protein', value: 124, target: 150, color: 'text-blue-500', bgColor: 'bg-blue-100' },
-  { name: 'Carbs', value: 180, target: 220, color: 'text-green-500', bgColor: 'bg-green-100' },
-  { name: 'Fat', value: 67, target: 80, color: 'text-yellow-500', bgColor: 'bg-yellow-100' },
+  {
+    name: "Calories",
+    value: 1847,
+    target: 2200,
+    color: "text-red-500",
+    bgColor: "bg-red-100",
+  },
+  {
+    name: "Protein",
+    value: 124,
+    target: 150,
+    color: "text-blue-500",
+    bgColor: "bg-blue-100",
+  },
+  {
+    name: "Carbs",
+    value: 180,
+    target: 220,
+    color: "text-green-500",
+    bgColor: "bg-green-100",
+  },
+  {
+    name: "Fat",
+    value: 67,
+    target: 80,
+    color: "text-yellow-500",
+    bgColor: "bg-yellow-100",
+  },
 ];
 
 const todayMeals = [
-  { name: 'Breakfast', calories: 320, time: '8:00 AM', eaten: true },
-  { name: 'Lunch', calories: 520, time: '12:30 PM', eaten: true },
-  { name: 'Snack', calories: 180, time: '3:30 PM', eaten: false },
-  { name: 'Dinner', calories: 450, time: '7:00 PM', eaten: false },
+  { name: "Breakfast", calories: 320, time: "8:00 AM", eaten: true },
+  { name: "Lunch", calories: 520, time: "12:30 PM", eaten: true },
+  { name: "Snack", calories: 180, time: "3:30 PM", eaten: false },
+  { name: "Dinner", calories: 450, time: "7:00 PM", eaten: false },
 ];
 
 const Dashboard = () => {
   const [userName, setUserName] = useState("");
   const [loading, setLoading] = useState(true);
- 
 
   useEffect(() => {
     const getProfile = async () => {
@@ -83,7 +109,7 @@ const Dashboard = () => {
         data: { session },
         error: sessionError,
       } = await supabase.auth.getSession();
-  console.log("Session:", session);
+      console.log("Session:", session);
 
       if (sessionError || !session?.user) {
         console.error("No session or error:", sessionError);
@@ -92,14 +118,14 @@ const Dashboard = () => {
       }
 
       const userId = session.user.id;
-console.log("User ID:", userId);
+      console.log("User ID:", userId);
 
       const { data: profile, error } = await supabase
         .from("profiles")
         .select("full_name")
         .eq("id", userId)
         .single();
-console.log("Profile data:", profile);
+      console.log("Profile data:", profile);
       if (error) {
         console.error("Error fetching profile:", error);
       } else if (profile) {
@@ -113,32 +139,32 @@ console.log("Profile data:", profile);
   }, []);
 
   const handleLogout = async () => {
-  const { error } = await supabase.auth.signOut();
-  if (error) {
-    console.error("Logout failed:", error.message);
-  } else {
-    console.log("User signed out");
-    // Optional: Redirect after logout
-    window.location.href = "/auth-page?mode=login"; // or "/login"
-  }
-};
+    const { error } = await supabase.auth.signOut();
+    if (error) {
+      console.error("Logout failed:", error.message);
+    } else {
+      console.log("User signed out");
+      // Optional: Redirect after logout
+      window.location.href = "/auth-page?mode=login"; // or "/login"
+    }
+  };
   const currentHour = new Date().getHours();
   const user = {
-    name: userName || "Delyte",
+    name: userName,
   };
- const greeting =
-   currentHour < 12
-     ? "Good morning"
-     : currentHour < 18
-     ? "Good afternoon"
-     : "Good evening";
+  const greeting =
+    currentHour < 12
+      ? "Good morning"
+      : currentHour < 18
+      ? "Good afternoon"
+      : "Good evening";
 
   return (
     <div className="bg-[#f9fafb] min-h-screen p-4 sm:p-6 lg:p-20 space-y-8  ">
       {/* Welcome Section */}
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-gray-900 mb-2">
-          {greeting}, {user?.name?.split(" ")[0]}! 👋
+          {greeting}, {user?.name?.split(" ")[0]} 👋
         </h1>
         <p className="text-gray-600">
           You're doing great! Keep up with your healthy eating journey.

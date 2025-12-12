@@ -18,234 +18,312 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
-import { Filter } from "lucide-react";
+import { Filter, ChefHat, Clock, Flame, X, Sparkles } from "lucide-react";
 import { useRecipeStore } from "@/lib/store/recipeStore";
- // ✅ connect to zustand
 
 export default function MealFilters() {
-  const [calories, setCalories] = useState([0, 800]);
-  const [time, setTime] = useState([0, 60]);
-
-  return (
-    <div className="w-full md:w-1/3 p-4 border-r bg-white dark:bg-zinc-900 shadow-sm manrope">
-      {/* Mobile Toggle */}
-      <div className="md:hidden mb-4">
-        <Sheet>
-          <SheetTrigger asChild>
-            <Button variant="outline" className="flex items-center gap-2">
-              <Filter size={18} /> Filters
-            </Button>
-          </SheetTrigger>
-          <SheetContent side="left" className="w-72 p-4 overflow-y-auto">
-            <SheetHeader>
-              <SheetTitle>Filter Recipes</SheetTitle>
-            </SheetHeader>
-            <FilterContent
-              calories={calories}
-              setCalories={setCalories}
-              time={time}
-              setTime={setTime}
-            />
-          </SheetContent>
-        </Sheet>
-      </div>
-
-      {/* Desktop Filters */}
-      <div className="hidden md:block">
-        <FilterContent
-          calories={calories}
-          setCalories={setCalories}
-          time={time}
-          setTime={setTime}
-        />
-      </div>
-    </div>
-  );
-}
-
-function FilterContent({ calories, setCalories, time, setTime }: any) {
   const { setFilters, setSort, getRecipes } = useRecipeStore();
 
-  const [selectedCuisine, setSelectedCuisine] = useState("");
-  const [selectedDiet, setSelectedDiet] = useState("");
+  const [calories, setCalories] = useState<[number, number]>([0, 800]);
+  const [time, setTime] = useState<[number, number]>([0, 60]);
+  const [selectedCuisine, setSelectedCuisine] = useState<string | null>(null);
+  const [selectedDiet, setSelectedDiet] = useState<string | null>(null);
   const [selectedIntolerances, setSelectedIntolerances] = useState<string[]>(
     []
   );
-  const [selectedMealType, setSelectedMealType] = useState("");
-  const [selectedSort, setSelectedSort] = useState("");
+  const [selectedMealType, setSelectedMealType] = useState<string | null>(null);
+  const [selectedSort, setSelectedSort] = useState<string | null>(null);
 
-  const handleApplyFilters = () => {
+  const handleApply = () => {
     setFilters({
-      cuisine: selectedCuisine,
-      diet: selectedDiet,
+      cuisine: selectedCuisine || "",
+      diet: selectedDiet || "",
       intolerances: selectedIntolerances.join(","),
-      mealType: selectedMealType,
+      mealType: selectedMealType || "",
       calories,
       time,
     });
-    setSort(selectedSort);
-    getRecipes(); // ✅ trigger fetch with new filters
+    if (selectedSort) {
+      setSort(selectedSort);
+    }
+    getRecipes();
   };
 
-  return (
-    <div className="space-y-6">
+  const handleReset = () => {
+    setCalories([0, 800]);
+    setTime([0, 60]);
+    setSelectedCuisine(null);
+    setSelectedDiet(null);
+    setSelectedIntolerances([]);
+    setSelectedMealType(null);
+    setSelectedSort(null);
+    setFilters({});
+    setSort("");
+    getRecipes();
+  };
+ const hasActiveFilters =
+   selectedCuisine ||
+   selectedDiet ||
+   selectedIntolerances.length > 0 ||
+   selectedMealType ||
+   calories[0] !== 0 ||
+   calories[1] !== 800 ||
+   time[0] !== 0 ||
+   time[1] !== 60 ||
+    selectedSort;
+  
+  const FilterContent = () => (
+    <div className="space-y-10 py-6">
       {/* Cuisine */}
-      <div>
-        <label className="font-semibold text-sm">Cuisine</label>
-        <Select onValueChange={(val) => setSelectedCuisine(val)}>
-          <SelectTrigger className="w-full mt-1">
-            <SelectValue placeholder="Select cuisine" />
-          </SelectTrigger>
-          <SelectContent>
-            {[
-              "Italian",
-              "Mexican",
-              "Indian",
-              "Chinese",
-              "French",
-              "African",
-            ].map((cuisine) => (
-              <SelectItem key={cuisine} value={cuisine.toLowerCase()}>
-                {cuisine}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+      <div className="space-y-3">
+        <label className="text-xl font-bold flex items-center gap-3 text-gray-800">
+          <ChefHat className="h-6 w-6 text-orange-600" />
+          Cuisine
+        </label>
+        <div className="flex gap-2 items-center">
+          <Select
+            onValueChange={(val) => setSelectedCuisine(val)}
+            value={selectedCuisine || ""}
+          >
+            <SelectTrigger className="w-full h-14 text-base border-2">
+              <SelectValue placeholder="Any cuisine" />
+            </SelectTrigger>
+            <SelectContent>
+              {[
+                "Italian",
+                "Mexican",
+                "Indian",
+                "Chinese",
+                "Japanese",
+                "Thai",
+                "Mediterranean",
+                "French",
+                "Korean",
+                "Greek",
+              ].map((c) => (
+                <SelectItem key={c} value={c.toLowerCase()}>
+                  {c}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          {selectedCuisine && (
+            <button
+              onClick={() => setSelectedCuisine(null)}
+              className="p-2 hover:bg-gray-100 rounded"
+            >
+              <X className="h-4 w-4" />
+            </button>
+          )}
+        </div>
       </div>
 
       {/* Diet */}
-      <div>
-        <label className="font-semibold text-sm">Diet</label>
-        <Select onValueChange={(val) => setSelectedDiet(val)}>
-          <SelectTrigger className="w-full mt-1">
-            <SelectValue placeholder="Select diet" />
-          </SelectTrigger>
-          <SelectContent>
-            {["Vegetarian", "Vegan", "Ketogenic", "Paleo", "Whole30"].map(
-              (diet) => (
-                <SelectItem key={diet} value={diet.toLowerCase()}>
-                  {diet}
+      <div className="space-y-3">
+        <label className="text-lg font-semibold mb-3 block">Diet</label>
+        <div className="flex gap-2 items-center">
+          <Select
+            onValueChange={(val) => setSelectedDiet(val)}
+            value={selectedDiet || ""}
+          >
+            <SelectTrigger className="w-full h-14 text-base border-2">
+              <SelectValue placeholder="No preference" />
+            </SelectTrigger>
+            <SelectContent>
+              {[
+                "Vegetarian",
+                "Vegan",
+                "Keto",
+                "Paleo",
+                "Gluten Free",
+                "Dairy Free",
+                "Pescatarian",
+              ].map((d) => (
+                <SelectItem key={d} value={d.toLowerCase()}>
+                  {d}
                 </SelectItem>
-              )
-            )}
-          </SelectContent>
-        </Select>
+              ))}
+            </SelectContent>
+          </Select>
+          {selectedDiet && (
+            <button
+              onClick={() => setSelectedDiet(null)}
+              className="p-2 hover:bg-gray-100 rounded"
+            >
+              <X className="h-4 w-4" />
+            </button>
+          )}
+        </div>
       </div>
 
       {/* Intolerances */}
-      <div>
-        <label className="font-semibold text-sm">Intolerances</label>
-        <div className="grid grid-cols-2 gap-2 mt-2">
-          {["Gluten", "Dairy", "Soy", "Peanut", "Shellfish"].map((intol) => (
+      <div className="space-y-4">
+        <label className="text-lg font-semibold mb-3 block">
+          Allergies & Intolerances
+        </label>
+        <div className="grid grid-cols-2 gap-4">
+          {[
+            "Gluten",
+            "Dairy",
+            "Egg",
+            "Peanut",
+            "Soy",
+            "Shellfish",
+            "Tree Nut",
+            "Sesame",
+          ].map((item) => (
             <label
-              key={intol}
-              className="flex items-center gap-2 text-sm cursor-pointer"
+              key={item}
+              className="flex items-center gap-3 cursor-pointer p-3 rounded-lg hover:bg-gray-50 transition"
             >
               <Checkbox
-                checked={selectedIntolerances.includes(intol.toLowerCase())}
+                checked={selectedIntolerances.includes(item.toLowerCase())}
                 onCheckedChange={(checked) => {
                   if (checked) {
                     setSelectedIntolerances([
                       ...selectedIntolerances,
-                      intol.toLowerCase(),
+                      item.toLowerCase(),
                     ]);
                   } else {
                     setSelectedIntolerances(
                       selectedIntolerances.filter(
-                        (i) => i !== intol.toLowerCase()
+                        (i) => i !== item.toLowerCase()
                       )
                     );
                   }
                 }}
-              />{" "}
-              {intol}
+              />
+              <span className="text-sm font-medium">{item}</span>
             </label>
           ))}
         </div>
       </div>
 
-      {/* Meal Type */}
-      <div>
-        <label className="font-semibold text-sm">Meal Type</label>
-        <Select onValueChange={(val) => setSelectedMealType(val)}>
-          <SelectTrigger className="w-full mt-1">
-            <SelectValue placeholder="Select type" />
-          </SelectTrigger>
-          <SelectContent>
-            {["Breakfast", "Main Course", "Side Dish", "Dessert", "Snack"].map(
-              (t) => (
-                <SelectItem key={t} value={t.toLowerCase()}>
-                  {t}
-                </SelectItem>
-              )
-            )}
-          </SelectContent>
-        </Select>
-      </div>
-
-      {/* Calories */}
-      <div>
-        <label className="font-semibold text-sm">Max Calories</label>
+      {/* Calories Slider */}
+      <div className="space-y-4">
+        <label className="text-lg font-semibold flex items-center gap-2 mb-4">
+          <Flame className="h-5 w-5 text-orange-600" />
+          Max Calories
+        </label>
         <Slider
           value={calories}
-          onValueChange={setCalories}
+          onValueChange={(val) => setCalories(val as [number, number])}
           max={1200}
           step={50}
-          className="mt-2"
+          className="py-4"
         />
-        <div className="text-xs mt-1 text-muted-foreground">
-          {calories[0]} - {calories[1]} kcal
+        <div className="flex justify-between text-sm text-gray-600">
+          <span>{calories[0]} cal</span>
+          <span>{calories[1]} cal</span>
         </div>
       </div>
 
-      {/* Cooking Time */}
-      <div>
-        <label className="font-semibold text-sm">Max Cooking Time (mins)</label>
+      {/* Time Slider */}
+      <div className="space-y-4">
+        <label className="text-lg font-semibold flex items-center gap-2 mb-4">
+          <Clock className="h-5 w-5 text-teal-600" />
+          Max Cooking Time
+        </label>
         <Slider
           value={time}
-          onValueChange={setTime}
+          onValueChange={(val) => setTime(val as [number, number])}
           max={120}
           step={5}
-          className="mt-2"
+          className="py-4"
         />
-        <div className="text-xs mt-1 text-muted-foreground">
-          {time[0]} - {time[1]} mins
+        <div className="flex justify-between items-center">
+          <span className="text-lg font-semibold">{time[0]} min</span>
+          <span className="text-sm text-gray-500">← Faster → Slower →</span>
+          <span className="text-lg font-semibold">{time[1]} min</span>
         </div>
       </div>
 
-      {/* Sorting */}
-      <div>
-        <label className="font-semibold text-sm">Sort By</label>
-        <Select onValueChange={(val) => setSelectedSort(val)}>
-          <SelectTrigger className="w-full mt-1">
-            <SelectValue placeholder="Choose sorting" />
+      {/* Sort */}
+      <div className="space-y-3">
+        <label className="text-xl font-bold flex items-center gap-3">
+          <Sparkles className="h-6 w-6 text-purple-600" />
+          Sort Results By
+        </label>
+        <Select
+          onValueChange={(val) => setSelectedSort(val)}
+          value={selectedSort || ""}
+        >
+          <SelectTrigger className="w-full h-14 text-base border-2">
+            <SelectValue placeholder="Best match" />
           </SelectTrigger>
           <SelectContent>
-            {[
-              "Popularity",
-              "Healthiness",
-              "Calories",
-              "Protein",
-              "Carbs",
-              "Fat",
-              "Time",
-              "Price",
-            ].map((sort) => (
-              <SelectItem key={sort} value={sort.toLowerCase()}>
-                {sort}
-              </SelectItem>
-            ))}
+            <SelectItem value="all">Best match</SelectItem>
+            <SelectItem value="popularity">Most Popular</SelectItem>
+            <SelectItem value="healthiness">Healthiest First</SelectItem>
+            <SelectItem value="time">Fastest to Make</SelectItem>
+            <SelectItem value="calories">Lowest Calories</SelectItem>
+            <SelectItem value="protein">Highest Protein</SelectItem>
           </SelectContent>
         </Select>
       </div>
 
-      {/* Apply Button */}
-      <Button
-        className="w-full bg-emerald-500 hover:bg-emerald-600 text-white font-semibold"
-        onClick={handleApplyFilters}
-      >
-        Apply Filters
-      </Button>
+      {/* Action Buttons */}
+      <div className="pt-8 border-t-2 border-gray-100 space-y-4">
+        <Button
+          onClick={handleApply}
+          className="w-full h-14 text-xl font-bold bg-gradient-to-r from-emerald-600 to-cyan-600 hover:from-emerald-700 hover:to-cyan-700 shadow-xl"
+        >
+          Apply Filters
+          {hasActiveFilters && <span className="ml-2">✨</span>}
+        </Button>
+        <Button variant="outline" onClick={handleReset} className="w-full h-12">
+          <X className="h-5 w-5 mr-2" />
+          Clear All Filters
+        </Button>
+      </div>
     </div>
+  );
+
+  return (
+    <>
+      {/* Mobile: Full-width Filter Bar */}
+      <div className="md:hidden w-full mb-8">
+        <Sheet>
+          <SheetTrigger asChild>
+            <Button
+              variant="outline"
+              size="lg"
+              className="w-full h-16 text-lg font-semibold flex items-center justify-center gap-4 border-2"
+            >
+              <Filter className="h-6 w-6" />
+              <span>Filters & Sorting</span>
+              {hasActiveFilters && (
+                <span className="ml-auto bg-emerald-100 text-emerald-800 px-3 py-1 rounded-full text-sm font-bold">
+                  Active
+                </span>
+              )}
+            </Button>
+          </SheetTrigger>
+          <SheetContent
+            side="bottom"
+            className="h-[90vh] rounded-t-3xl overflow-y-auto"
+          >
+            <SheetHeader className="text-center pb-6 border-b">
+              <SheetTitle className="text-3xl font-bold">
+                Refine Your Recipes
+              </SheetTitle>
+            </SheetHeader>
+            <div className="px-6">
+              <FilterContent />
+            </div>
+          </SheetContent>
+        </Sheet>
+      </div>
+
+      {/* Desktop: Full-Width Horizontal Filter Bar (Beautiful!) */}
+      <div className="hidden md:block w-full mb-12">
+        <div className="bg-white rounded-3xl shadow-2xl p-8 border border-gray-100">
+          <h2 className="text-3xl font-bold mb-10 text-center bg-gradient-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent">
+            Find Your Perfect Recipe
+          </h2>
+          <FilterContent />
+        </div>
+      </div>
+    </>
   );
 }

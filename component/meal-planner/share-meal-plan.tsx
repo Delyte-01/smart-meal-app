@@ -21,7 +21,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import type { Recipe } from "@/app/planner/page";
+import type { Recipe } from "@/app/dashboard/planner/page";
 
 interface ShareMealPlanModalProps {
   isOpen: boolean;

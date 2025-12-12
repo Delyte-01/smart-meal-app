@@ -18,15 +18,17 @@ import {
   Clock,
   Users,
 } from "lucide-react";
-import type { Recipe } from "@/app/planner/page";
+import { useMealPlanStore } from "@/lib/store/mealPlan";
+import { Recipe } from "@/types/recipe";
+import { useRecipeModal } from "@/lib/store/recipeModal";
 
-interface WeeklyCalendarProps {
-  weekDates: Date[];
-  mealPlan: Record<string, Record<string, Recipe | null>>;
-  onSlotClick: (day: string, mealType: string) => void;
-  onRemoveRecipe: (day: string, mealType: string) => void;
-  onAddRecipe: (day: string, mealType: string, recipe: Recipe) => void;
-}
+// interface WeeklyCalendarProps {
+//   weekDates: Date[];
+//   mealPlan: Record<string, Record<string, Recipe | null>>;
+//   onSlotClick: (day: string, mealType: string) => void;
+//   onRemoveRecipe: (day: string, mealType: string) => void;
+//   onAddRecipe: (day: string, mealType: string, recipe: Recipe) => void;
+// }
 
 const daysOfWeek = [
   "Monday",
@@ -147,7 +149,7 @@ function MealSlot({
               <div className="flex items-center gap-2 text-xs text-muted-foreground">
                 <div className="flex items-center gap-1">
                   <Clock className="h-3 w-3" />
-                  {recipe.prepTime + recipe.cookTime}m
+                  {/* {recipe.prepTime + recipe.cookTime}m */}
                 </div>
                 <div className="flex items-center gap-1">
                   <Users className="h-3 w-3" />
@@ -184,13 +186,10 @@ function MealSlot({
   );
 }
 
-export function WeeklyCalendar({
-  weekDates,
-  mealPlan,
-  onSlotClick,
-  onRemoveRecipe,
-  onAddRecipe,
-}: WeeklyCalendarProps) {
+export function WeeklyCalendar({ weekDates }: { weekDates: Date[] }) {
+  const { mealPlan, setRecipe, removeRecipe } = useMealPlanStore();
+    const { openModal } = useRecipeModal();
+
   return (
     <Card className="border-0 shadow-lg md:min-h-[800px]">
       <CardContent className="p-6 overflow-clip">
@@ -210,7 +209,7 @@ export function WeeklyCalendar({
 
               {/* Meal Slots */}
               <div className="space-y-3 ">
-                {mealTypes.map((mealType) => (
+                {/* {mealTypes.map((mealType) => (
                   <MealSlot
                     key={`${day}-${mealType.key}`}
                     day={day}
@@ -220,6 +219,20 @@ export function WeeklyCalendar({
                     onRemoveRecipe={() => onRemoveRecipe(day, mealType.key)}
                     onAddRecipe={(recipe) =>
                       onAddRecipe(day, mealType.key, recipe)
+                    }
+                  />
+                ))} */}
+
+                {mealTypes.map((mealType) => (
+                  <MealSlot
+                    key={`${day}-${mealType.key}`}
+                    day={day}
+                    mealType={mealType.key}
+                    recipe={mealPlan[day]?.[mealType.key] || null}
+                    onSlotClick={() => openModal(day, mealType.key)} // ✅ open modal here
+                    onRemoveRecipe={() => removeRecipe(day, mealType.key)}
+                    onAddRecipe={(recipe: Recipe) =>
+                      setRecipe(day, mealType.key, recipe)
                     }
                   />
                 ))}

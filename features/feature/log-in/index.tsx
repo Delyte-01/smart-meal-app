@@ -1,124 +1,124 @@
 "use client";
-import { useState,useEffect } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import Link from "next/link";
 import Image from "next/image";
 import { supabase } from "@/lib/suparbaseClient";
-import {  useSearchParams,useRouter } from "next/navigation";
+import { useSearchParams, useRouter } from "next/navigation";
 import { toast } from "sonner";
 
 const LogIn = () => {
-   const router = useRouter();
+  const router = useRouter();
   const searchParams = useSearchParams();
   const [formData, setFormData] = useState({
     name: "",
     email: "",
     password: "",
   });
-   const initialMode = searchParams.get('mode') === 'login'; 
+  const initialMode = searchParams.get("mode") === "login";
 
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
   const [isLogin, setIsLogin] = useState(initialMode);
- 
- 
+
   const handleInputChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({
       ...formData,
       [e.target.name]: e.target.value,
     });
   };
-const handleSubmit = async (e: React.FormEvent) => {
-  e.preventDefault();
-  setLoading(true);
-  setMessage("");
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    setMessage("");
 
     const { name, email, password } = formData;
-    console.log(name, email, password);
 
-  if (isLogin) {
-    // ✅ LOGIN flow
-    const { data, error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
+    try {
+      if (isLogin) {
+        // ✅ LOGIN flow
+        const { data, error } = await supabase.auth.signInWithPassword({
+          email,
+          password,
+        });
 
-    if (error) {
-      if (error.message.includes("Invalid login credentials")) {
-           toast.error("No account found. Please sign up first.");
-      } else {
-          setMessage(error.message);
-          toast.error("Login failed. Please try again.");
-      }
-    } else {
-      toast.success("Login successful!");
-      setFormData({ name: "", email: "", password: "" });
-      router.push("/dashboard");
-    }
-  } else {
-    // ✅ SIGNUP flow
-    const { data, error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        data: { full_name: name },
-      },
-    });
-
-    if (error) {
-      setMessage(error.message);
-    } else if (data.user) {
-        const userId = data.user.id;
-        const {
-          data: { session },
-        } = await supabase.auth.getSession();
-
-        const user = session?.user;
-        if (user) {
-          const { error: insertError } = await supabase
-            .from("profiles")
-            .insert({
-              id: user.id, // must match auth.uid()
-              full_name: name, // your input
-            });
-          if (insertError) {
-            console.error("Profile insert error:", insertError.message || insertError);
-            toast.error("Signup succeeded, but profile creation failed");
+        if (error) {
+          if (error.message.includes("Invalid login credentials")) {
+            toast.error("No account found. Please sign up first.");
           } else {
-              toast.success("Signup and profile saved!");
-            console.log("Profile created successfully");
+            setMessage(error.message);
+            toast.error("Login failed. Please try again.");
           }
+          return;
         }
 
-
-   const { error: profileError } = await supabase
-     .from("profiles")
-     .upsert([{ id: userId, full_name: name }], { onConflict: "id" });
-
-      if (profileError) {
-        setMessage("Signup succeeded, but saving your name failed.");
+        toast.success("Login successful!");
+        // Redirect with replace to avoid back navigation issues
+        router.replace("/dashboard");
       } else {
-        toast.success("Signup and profile saved!");
-        setIsLogin(true);
+        // ✅ SIGNUP flow
+        const { data, error } = await supabase.auth.signUp({
+          email,
+          password,
+          options: {
+            data: { full_name: name },
+            emailRedirectTo: `${window.location.origin}/dashboard`,
+          },
+        });
+
+        if (error) {
+          setMessage(error.message);
+          toast.error("Signup failed: " + error.message);
+          return;
+        }
+
+        if (data.user) {
+          // Create profile after successful signup
+          const { error: profileError } = await supabase
+            .from("profiles")
+            .upsert([{ id: data.user.id, full_name: name }]);
+
+          if (profileError) {
+            console.error("Profile creation error:", profileError);
+            toast.success(
+              "Account created, but profile setup failed. Please update your profile later."
+            );
+          } else {
+            toast.success(
+              "Account created successfully! Please check your email to confirm your account."
+            );
+          }
+
+          // Switch to login mode after successful signup
+          setIsLogin(true);
+        }
       }
+    } catch (err: any) {
+      console.error("Auth error:", err);
+      toast.error("An unexpected error occurred");
+    } finally {
+      setLoading(false);
+      // Only clear form on success
+      setFormData({ name: "", email: "", password: "" });
     }
-  }
+  };
 
-  setFormData({ name: "", email: "", password: "" });
-  setLoading(false);
-};
-
- useEffect(() => {
+  useEffect(() => {
     const checkUser = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (user) router.push('/dashboard');
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+      if (session) {
+        router.replace("/dashboard");
+      }
     };
     checkUser();
-  }, []);
+  }, [router]);
 
- const handleGoogleLogin = async () => {
+  const handleGoogleLogin = async () => {
     const { error } = await supabase.auth.signInWithOAuth({
       provider: "google",
       options: {
@@ -128,10 +128,9 @@ const handleSubmit = async (e: React.FormEvent) => {
 
     if (error) {
       console.error("Google login error:", error.message);
+      toast.error("Google login failed");
     }
   };
-
-
 
   return (
     <div className="flex bg-white w-full mx-auto rounded-3xl overflow-clip shadow">
@@ -159,7 +158,7 @@ const handleSubmit = async (e: React.FormEvent) => {
                   value={formData.name}
                   onChange={handleInputChange}
                   className="bg-form-input border-form-input-border focus:border-primary focus:ring-1 focus:ring-primary"
-                  required
+                  required={!isLogin}
                 />
               </div>
             )}
@@ -206,7 +205,7 @@ const handleSubmit = async (e: React.FormEvent) => {
               className={`w-full bg-[#16a249] text-white hover:bg-[#16a249af] cursor-pointer py-3 rounded-lg font-medium`}
               disabled={loading}
             >
-              {isLogin ? "Login" : "Sign Up"}
+              {loading ? "Processing..." : isLogin ? "Login" : "Sign Up"}
             </Button>
           </form>
 
@@ -219,7 +218,11 @@ const handleSubmit = async (e: React.FormEvent) => {
             </div>
           </div>
 
-          <Button   onClick={handleGoogleLogin} className="space-y-3 flex gap-2.5 justify-center border w-full bg-white text-black hover:text-white hover:bg-black/30 cursor-pointer transition-all duration-700 ease-in-out">
+          <Button
+            onClick={handleGoogleLogin}
+            className="space-y-3 flex gap-2.5 justify-center border w-full bg-white text-black hover:text-white hover:bg-black/30 cursor-pointer transition-all duration-700 ease-in-out"
+            disabled={loading}
+          >
             <svg className="w-5 h-5" viewBox="0 0 24 24">
               <path
                 fill="#2f67bc"
@@ -238,7 +241,7 @@ const handleSubmit = async (e: React.FormEvent) => {
                 d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
               />
             </svg>
-            {isLogin ? " log In" : "Sign Up"} with Google
+            {isLogin ? "Log In" : "Sign Up"} with Google
           </Button>
 
           {message && <p className="text-sm text-red-500">{message}</p>}
@@ -248,10 +251,14 @@ const handleSubmit = async (e: React.FormEvent) => {
               {isLogin ? "Don't have an account?" : "Already have an account?"}{" "}
               <Button
                 type="button"
-                onClick={() => setIsLogin(!isLogin)}
+                onClick={() => {
+                  setIsLogin(!isLogin);
+                  setMessage("");
+                }}
                 className="text-primary bg-transparent hover:bg-transparent shadow-none cursor-pointer hover:underline font-medium"
+                disabled={loading}
               >
-                {isLogin ? "Create an account" : "log in"}{" "}
+                {isLogin ? "Create an account" : "Log in"}
               </Button>
             </p>
           </div>
